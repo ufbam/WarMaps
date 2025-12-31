@@ -293,6 +293,8 @@ function updateMap(year) {
       const name = d.properties.name;
       return styles.has(name) ? "country conflict" : "country";
     })
+    .style("fill", (d) => styles.get(d.properties.name)?.color || "#fff")
+    .style("fill-opacity", (d) => styles.get(d.properties.name)?.opacity || 1);
     .attr("fill", (d) => styles.get(d.properties.name)?.color || "#fff")
     .attr("fill-opacity", (d) => styles.get(d.properties.name)?.opacity || 1);
 }

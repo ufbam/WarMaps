@@ -132,6 +132,7 @@ main {
 }
 
 .country.conflict {
+  fill: var(--accent);
   stroke-width: 0.8px;
 }
 
