@@ -3,7 +3,6 @@ const yearValue = document.getElementById("year-value");
 const yearDock = document.getElementById("year-dock");
 const tooltip = document.getElementById("tooltip");
 const mapElement = document.getElementById("world-map");
-const mapContainer = document.getElementById("map-container");
 
 const minYear = 24;
 const maxYear = 2024;
@@ -210,36 +209,31 @@ conflicts.forEach((conflict, index) => {
   }
 });
 
-let svg;
-let projection;
-let path;
-let g;
-let countryLayer;
-let labelLayer;
-let mapReady = false;
+const width = 1200;
+const height = 600;
+const svg = d3
+  .select(mapElement)
+  .attr("viewBox", `0 0 ${width} ${height}`)
+  .attr("preserveAspectRatio", "xMidYMid meet");
+
+const projection = d3.geoNaturalEarth1().scale(210).translate([width / 2, height / 2]);
+const path = d3.geoPath(projection);
+
+const g = svg.append("g");
+const countryLayer = g.append("g");
+const labelLayer = g.append("g");
+
+const zoom = d3
+  .zoom()
+  .scaleExtent([1, 6])
+  .on("zoom", (event) => {
+    g.attr("transform", event.transform);
+    updateLabels(event.transform.k);
+  });
+
+svg.call(zoom);
 
 const activeConflictsByCountry = new Map();
-let countryFeatures = [];
-let mapStatus;
-
-const d3Sources = [
-  "https://d3js.org/d3.v7.min.js",
-  "https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js",
-  "https://unpkg.com/d3@7/dist/d3.min.js"
-];
-
-const topojsonSources = [
-  "https://cdn.jsdelivr.net/npm/topojson-client@3",
-  "https://unpkg.com/topojson-client@3",
-  "https://d3js.org/topojson.v3.min.js"
-];
-
-const worldDataSources = [
-  "./assets/countries-110m.json",
-  "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json",
-  "https://unpkg.com/world-atlas@2/countries-110m.json",
-  "https://raw.githubusercontent.com/topojson/world-atlas/master/countries-110m.json"
-];
 
 function updateDock(year) {
   yearDock.innerHTML = "";
@@ -290,9 +284,6 @@ function buildConflictIndex(year) {
 }
 
 function updateMap(year) {
-  if (!mapReady) {
-    return;
-  }
   const styles = buildConflictIndex(year);
 
   countryLayer
@@ -306,9 +297,6 @@ function updateMap(year) {
 }
 
 function updateLabels(scale) {
-  if (!mapReady) {
-    return;
-  }
   labelLayer
     .selectAll("text")
     .attr("opacity", (d) => {
@@ -354,25 +342,8 @@ function handleYearInput() {
   updateMap(year);
 }
 
-function showMapStatus(message) {
-  if (!mapStatus) {
-    mapStatus = document.createElement("div");
-    mapStatus.className = "map-status";
-    mapContainer.appendChild(mapStatus);
-  }
-  mapStatus.textContent = message;
-}
-
-function clearMapStatus() {
-  if (mapStatus) {
-    mapStatus.remove();
-    mapStatus = null;
-  }
-}
-
 function prepMap(world) {
   const countries = topojson.feature(world, world.objects.countries).features;
-  countryFeatures = countries;
 
   countries.forEach((feature) => {
     feature.properties.area = d3.geoArea(feature);
@@ -399,95 +370,15 @@ function prepMap(world) {
   handleYearInput();
 }
 
-function loadScriptSequentially(sources) {
-  return new Promise((resolve, reject) => {
-    const attempt = (index) => {
-      if (index >= sources.length) {
-        reject(new Error("All sources failed"));
-        return;
-      }
-      const script = document.createElement("script");
-      script.src = sources[index];
-      script.onload = () => resolve();
-      script.onerror = () => {
-        script.remove();
-        attempt(index + 1);
-      };
-      document.head.appendChild(script);
-    };
-    attempt(0);
+fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json")
+  .then((response) => response.json())
+  .then(prepMap)
+  .catch(() => {
+    mapElement.insertAdjacentHTML(
+      "afterend",
+      "<p>Unable to load map data. Please check your connection.</p>"
+    );
   });
-}
-
-async function loadJsonSequentially(sources) {
-  for (const source of sources) {
-    try {
-      const response = await fetch(source);
-      if (!response.ok) {
-        continue;
-      }
-      return await response.json();
-    } catch (error) {
-      continue;
-    }
-  }
-  throw new Error("Unable to load map data");
-}
-
-async function initMap() {
-  if (!window.d3) {
-    await loadScriptSequentially(d3Sources);
-  }
-  if (!window.topojson) {
-    await loadScriptSequentially(topojsonSources);
-  }
-
-  const width = 1200;
-  const height = 600;
-  svg = d3
-    .select(mapElement)
-    .attr("viewBox", `0 0 ${width} ${height}`)
-    .attr("preserveAspectRatio", "xMidYMid meet");
-
-  projection = d3.geoNaturalEarth1().scale(210).translate([width / 2, height / 2]);
-  path = d3.geoPath(projection);
-
-  g = svg.append("g");
-  countryLayer = g.append("g");
-  labelLayer = g.append("g");
-
-  const zoom = d3
-    .zoom()
-    .scaleExtent([1, 6])
-    .on("zoom", (event) => {
-      g.attr("transform", event.transform);
-      updateLabels(event.transform.k);
-    });
-
-  svg.call(zoom);
-
-  const world = await loadJsonSequentially(worldDataSources);
-  mapReady = true;
-  clearMapStatus();
-  prepMap(world);
-}
-
-async function bootstrap() {
-  handleYearInput();
-  try {
-    showMapStatus("Loading map data…");
-    await initMap();
-  } catch (error) {
-    showMapStatus("Unable to load map data. Please check your connection.");
-  }
-}
 
 slider.addEventListener("input", handleYearInput);
-window.addEventListener("resize", () => {
-  if (!mapReady) {
-    return;
-  }
-  updateLabels(d3.zoomTransform(svg.node()).k);
-});
-
-bootstrap();
+window.addEventListener("resize", () => updateLabels(d3.zoomTransform(svg.node()).k));

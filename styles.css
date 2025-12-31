@@ -118,21 +118,6 @@ main {
   position: relative;
 }
 
-.map-status {
-  position: absolute;
-  inset: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--faded-ink);
-  border: 1px dashed var(--faded-ink);
-  background: rgba(255, 255, 255, 0.9);
-  pointer-events: none;
-}
-
 #world-map {
   width: 100%;
   height: 70vh;
