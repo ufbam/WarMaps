@@ -125,14 +125,14 @@ main {
 }
 
 .country {
-  fill: var(--conflict-color, var(--paper));
-  fill-opacity: var(--conflict-opacity, 1);
+  fill: var(--paper);
   stroke: var(--ink);
   stroke-width: 0.6px;
   transition: fill 0.25s ease, fill-opacity 0.25s ease;
 }
 
 .country.conflict {
+  fill: var(--accent);
   stroke-width: 0.8px;
 }
 

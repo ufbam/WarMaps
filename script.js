@@ -234,6 +234,7 @@ const zoom = d3
 svg.call(zoom);
 
 const activeConflictsByCountry = new Map();
+let countryFeatures = [];
 
 function updateDock(year) {
   yearDock.innerHTML = "";
@@ -292,8 +293,10 @@ function updateMap(year) {
       const name = d.properties.name;
       return styles.has(name) ? "country conflict" : "country";
     })
-    .style("--conflict-color", (d) => styles.get(d.properties.name)?.color || null)
-    .style("--conflict-opacity", (d) => styles.get(d.properties.name)?.opacity ?? null);
+    .style("fill", (d) => styles.get(d.properties.name)?.color || "#fff")
+    .style("fill-opacity", (d) => styles.get(d.properties.name)?.opacity || 1);
+    .attr("fill", (d) => styles.get(d.properties.name)?.color || "#fff")
+    .attr("fill-opacity", (d) => styles.get(d.properties.name)?.opacity || 1);
 }
 
 function updateLabels(scale) {
@@ -344,6 +347,7 @@ function handleYearInput() {
 
 function prepMap(world) {
   const countries = topojson.feature(world, world.objects.countries).features;
+  countryFeatures = countries;
 
   countries.forEach((feature) => {
     feature.properties.area = d3.geoArea(feature);
