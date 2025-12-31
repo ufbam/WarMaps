@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WarMaps — Global Conflict Timeline</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="timeline">
+    <div class="timeline-header">
+      <h1>WarMaps</h1>
+      <p>Scroll through 2,000 years of conflict. Hover to explore wars by country.</p>
+    </div>
+    <div class="slider-wrapper">
+      <input id="year-slider" type="range" min="24" max="2024" value="2024" step="1" aria-label="Year selector" />
+      <div class="year-display">
+        <span id="year-value">2024</span>
+      </div>
+      <div id="year-dock" class="year-dock" aria-hidden="true"></div>
+    </div>
+  </header>
+
+  <main>
+    <div id="map-container" class="map-container">
+      <svg id="world-map" role="img" aria-label="World map showing conflicts"></svg>
+    </div>
+    <div id="tooltip" class="tooltip" role="dialog" aria-live="polite"></div>
+    <div class="legend">
+      <div class="legend-item">
+        <span class="legend-swatch civil"></span>
+        <span>Civil war</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-swatch interstate"></span>
+        <span>Interstate war</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-swatch faded"></span>
+        <span>Low-intensity year</span>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>
+      Conflict metadata sourced from curated Wikipedia entries (linked in the hover cards).
+      Map outlines from Natural Earth via the world-atlas dataset. Conflicts are mapped onto modern borders for context.
+    </p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
