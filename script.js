@@ -295,6 +295,8 @@ function updateMap(year) {
     })
     .style("fill", (d) => styles.get(d.properties.name)?.color || "#fff")
     .style("fill-opacity", (d) => styles.get(d.properties.name)?.opacity || 1);
+    .attr("fill", (d) => styles.get(d.properties.name)?.color || "#fff")
+    .attr("fill-opacity", (d) => styles.get(d.properties.name)?.opacity || 1);
 }
 
 function updateLabels(scale) {
